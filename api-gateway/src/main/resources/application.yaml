@@ -1,29 +1,69 @@
 spring:
   application:
-    name: api-gateway
-
+    name: API-GATEWAY
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8080/realms/keyclock-Security
+#      client:
+#        registration:
+#          keycloak:
+#            client-id: keyclock-API
+#            authorization-grant-type: authorization_code
+#            redirect-uri:  "http://localhost:9090/login/oauth2/code/keycloak"
+#            scope: openid, profile, email
+#        provider:
+#          keycloak:
+#            issuer-uri: http://localhost:8080/realms/keyclock-Security
   cloud:
     gateway:
-      routes:
+      server:
+        webflux:
+          # Turn on service discovery lookups
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          # Define your explicit routes here
+          routes:
+            - id: ORDER-SERVICE
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/orders/**
 
-        - id: ORDER-SERVICE
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/orders/**
+            - id: USER-SERVICE
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/users/**
 
-        - id: USER-SERVICE
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/users/**
+            - id: PRODUCT-SERVICE
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/products/**
 
-        - id: PRODUCT-SERVICE
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/products/**
+            - id: google
+              uri: https://google.com
+              predicates:
+                - Path=/test
+
+
 server:
   port: 9090
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+logging:
+  level:
+    org.springframework.cloud.gateway.route: TRACE
+    org.springframework.cloud.gateway: TRACE

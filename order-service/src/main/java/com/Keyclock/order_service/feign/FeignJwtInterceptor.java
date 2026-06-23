@@ -21,11 +21,15 @@ public class FeignJwtInterceptor
                         .getAuthentication();
 
         if (auth instanceof JwtAuthenticationToken jwt) {
+
+            String token = jwt.getToken().getTokenValue();
+
+            System.out.println("TOKEN FOUND");
+            System.out.println(token);
             template.header(
                     "Authorization",
                     "Bearer " +
-                            jwt.getToken()
-                                    .getTokenValue());
+                            token);
         }
     }
 }
